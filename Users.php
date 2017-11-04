@@ -9,6 +9,7 @@ class Users extends Database
 }
 
 $obj = new Users();
-$b=$obj->where(['username'=>'tonmoy','id'=>'24']);
-$a=$obj->get('users');
-print_r($a);
+echo '<pre>';
+$b=$obj->order_by('id', 'DESC')->limit(3,5)->getAll('courses');
+
+print_r($b);

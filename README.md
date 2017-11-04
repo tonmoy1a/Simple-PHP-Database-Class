@@ -1,1 +1,1 @@
-# Simple-PHP-Database-Class
+# Simple PHP Database Query Builder Class
