@@ -3,6 +3,7 @@
 class Database 
 {	
 	public $conn;
+	public $select='*';
 	public $where='';
 	public $param=[];
 	public $limit='';
@@ -19,7 +20,7 @@ class Database
 
 	public function get($table=''){
 		try {
-            $query = "SELECT * FROM `$table` $this->where $this->limit";
+            $query = "SELECT $this->select FROM `$table` $this->where $this->limit";
             echo $query;
             $stmt = $this->conn->prepare($query);
             $stmt->execute(array_values($this->param));
@@ -31,14 +32,27 @@ class Database
 
 	public function getAll($table=''){
 		try {
-            $query = "SELECT * FROM `$table` $this->where $this->order_by $this->limit";
+            $query = "SELECT $this->select FROM `$table` $this->where $this->order_by $this->limit";
             echo $query;
             $stmt = $this->conn->prepare($query);
-            $stmt->execute(array_values($this->param));
+			$stmt->execute(array_values($this->param));
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $ex) {
             echo $ex->getMessage();
         }
+	}
+
+	public function insert($request_data=[]){
+		try {
+			$query = "";
+		} catch (PDOException $e){
+			echo $e->getMessage;
+		}
+	}
+
+	public function select($param=[]){
+		$this->select= implode(',',$param);
+		return $this;
 	}
 
 	public function where($param=[]){

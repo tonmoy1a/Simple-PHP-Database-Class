@@ -10,6 +10,6 @@ class Users extends Database
 
 $obj = new Users();
 echo '<pre>';
-$b=$obj->order_by('id', 'DESC')->limit(3,5)->getAll('courses');
+$b=$obj->select(['id','title'])->where(['id'=>21])->order_by('id', 'DESC')->limit(0,5)->getAll('courses');
 
 print_r($b);
