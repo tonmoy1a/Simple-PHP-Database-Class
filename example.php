@@ -2,13 +2,13 @@
 
 include 'class/Database.php';
 
-class Users extends Database
+class Example extends Database
 {
 	
 
 }
 
-$obj = new Users();
+$obj = new Example;
 echo '<pre>';
 $b=$obj->select(['id','title'])->where(['id'=>21])->order_by('id', 'DESC')->limit(0,5)->getAll('courses');
 

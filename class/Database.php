@@ -21,7 +21,6 @@ class Database
 	public function get($table=''){
 		try {
             $query = "SELECT $this->select FROM `$table` $this->where $this->limit";
-            echo $query;
             $stmt = $this->conn->prepare($query);
             $stmt->execute(array_values($this->param));
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -33,7 +32,6 @@ class Database
 	public function getAll($table=''){
 		try {
             $query = "SELECT $this->select FROM `$table` $this->where $this->order_by $this->limit";
-            echo $query;
             $stmt = $this->conn->prepare($query);
 			$stmt->execute(array_values($this->param));
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
