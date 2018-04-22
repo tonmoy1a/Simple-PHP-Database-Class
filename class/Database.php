@@ -12,7 +12,7 @@ class Database
     public function __construct()
     {
         try {
-            $this->conn = new PDO('mysql:host=localhost;dbname=bitm_course', 'root', '');
+            $this->conn = new PDO('mysql:host=localhost;dbname=mbdda_egg', 'root', '');
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             echo 'ERROR: ' . $e->getMessage();
@@ -46,7 +46,19 @@ class Database
     public function insert($table = '', $request_data = [])
     {
         try {
-            $query = "INSERT INTO $table";
+            $request_values = implode(', ', $request_data);
+            $request_colums = implode(', ', array_keys($request_data));
+            $query = "INSERT INTO $table ($request_colums) VALUES ($request_values)";
+            echo $query;
+        } catch (PDOException $e) {
+            echo $e->getMessage;
+        }
+    }
+
+    public function update($table = '', $request_data = [])
+    {
+        try {
+            $query = "UPDATE $table SET  $this->where ";
         } catch (PDOException $e) {
             echo $e->getMessage;
         }
