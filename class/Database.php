@@ -80,6 +80,16 @@ class Database
         $this->where= 'WHERE '.trim($w, 'AND ');
         return $this;
     }
+    
+    public function rowCount($table='') {
+        try {
+            $query = "SELECT * FROM `$table` $this->where ";
+            $stmt = $this->conn->query($query);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+    }
 
     public function limit($offset = '', $total_no = '')
     {
