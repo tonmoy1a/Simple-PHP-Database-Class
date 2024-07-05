@@ -12,7 +12,7 @@ class Database
     public function __construct()
     {
         try {
-            $this->conn = new PDO('mysql:host=localhost;dbname=mbdda_egg', 'root', '');
+            $this->conn = new PDO('mysql:host=localhost;dbname=DB_NAME', 'DB_USER', 'DB_PASSWORD');
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             echo 'ERROR: ' . $e->getMessage();
@@ -22,9 +22,10 @@ class Database
     public function get($table = '')
     {
         try {
-            $query = "SELECT $this->select FROM `$table` $this->where $this->limit";
+            $query = "SELECT $this->select FROM `$table` $this->where $this->order_by LIMIT 1";
             $stmt = $this->conn->prepare($query);
             $stmt->execute(array_values($this->param));
+            $this->resetAllProperty();
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $ex) {
             echo $ex->getMessage();
@@ -37,7 +38,24 @@ class Database
             $query = "SELECT $this->select FROM `$table` $this->where $this->order_by $this->limit";
             $stmt = $this->conn->prepare($query);
             $stmt->execute(array_values($this->param));
+            $this->resetAllProperty();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+        }
+    }
+    
+    public function rowQuery($query, $data, $is_single_row=false)
+    {
+        try {
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute(array_values($data));
+            $this->resetAllProperty();
+            if($is_single_row){
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            }else{
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
         } catch (Exception $ex) {
             echo $ex->getMessage();
         }
@@ -47,9 +65,13 @@ class Database
     {
         try {
             $request_values = implode(', ', $request_data);
+            $comma_values = trim(str_repeat('?,', count($request_data)), ',');
             $request_colums = implode(', ', array_keys($request_data));
-            $query = "INSERT INTO $table ($request_colums) VALUES ($request_values)";
-            echo $query;
+            $query = "INSERT INTO $table ($request_colums) VALUES ($comma_values)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute(array_values($request_data));
+            $this->resetAllProperty();
+            return $this->conn->lastInsertId();
         } catch (PDOException $e) {
             echo $e->getMessage;
         }
@@ -57,11 +79,19 @@ class Database
 
     public function update($table = '', $request_data = [])
     {
-        try {
-            $query = "UPDATE $table SET  $this->where ";
-        } catch (PDOException $e) {
-            echo $e->getMessage;
+        $set_data;
+        foreach($request_data as $key => $data){
+            $set_data .= $key.'= ?, ';
         }
+        $set_data = trim($set_data, ', ');
+        
+        $values = array_merge(array_values($request_data),array_values($this->param));
+
+        $query = "UPDATE $table SET $set_data $this->where ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($values);
+        $this->resetAllProperty();
+        
     }
 
     public function select($param = [])
@@ -84,7 +114,9 @@ class Database
     public function rowCount($table='') {
         try {
             $query = "SELECT * FROM `$table` $this->where ";
-            $stmt = $this->conn->query($query);
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute(array_values($this->param));
+            $this->resetAllProperty();
             return $stmt->rowCount();
         } catch (PDOException $e) {
             echo $e->getMessage();
@@ -101,5 +133,13 @@ class Database
     {
         $this->order_by = 'ORDER BY '.$column.' '.$order;
         return $this;
+    }
+    
+    private function resetAllProperty(){
+        $this->select='*';
+        $this->where='';
+        $this->param=[];
+        $this->limit='';
+        $this->order_by='';
     }
 }
